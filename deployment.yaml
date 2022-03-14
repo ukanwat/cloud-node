@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node
+  labels:
+    app: node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node
+  template:
+    metadata:
+      labels:
+        app: node
+    spec:
+      containers:
+      - name: node
+        image: registry.gitlab.com/utkarshkanwat/cloud-server:latest
+        ports:
+        - containerPort: 3000
+      imagePullSecrets:
+           - name: regcred
