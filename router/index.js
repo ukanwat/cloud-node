@@ -3,8 +3,9 @@ const router = new Router()
 
 
 router.get('/', (ctx, next) => {
-    ctx.body = 'hello koa'
+    ctx.body = '1.4'
 })
+
 
 
 router.get('/user', function (ctx, next) {

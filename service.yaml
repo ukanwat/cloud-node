@@ -5,7 +5,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - targetPort: 3000
+    - targetPort: 5000
       port: 80
   selector:
       app: node

@@ -1,8 +1,9 @@
 import Router from '@koa/router'
 import { k8sApi } from '../conf/k8s.js'
 import * as  got from 'got';
-const router = new Router({ prefix: '/deployment' })
+const appRouter = new Router({ prefix: '/app' })
 // https://github.com/tdegrunt/jsonschema/blob/HEAD/examples/all.js
+
 
 import * as jsonSchema from 'jsonschema'
 
@@ -60,7 +61,7 @@ var addressSchema = {
 
 // Person
 var schema = {
-    "id": "/SimplePerson",
+    "id": "/app",
     "type": "object",
     "properties": {
         "name": { "type": "string" },
@@ -104,7 +105,7 @@ console.log(v.validate(p, schema));
 
 
 
-router.post('/create', async (ctx, next) => {
+appRouter.post('/create', async (ctx, next) => {
 
 
     const req = ctx.request
@@ -216,4 +217,4 @@ router.post('/create', async (ctx, next) => {
 })
 
 
-export default router
+export default appRouter

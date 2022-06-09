@@ -18,6 +18,6 @@ spec:
       - name: node
         image: registry.gitlab.com/utkarshkanwat/cloud-server:latest
         ports:
-        - containerPort: 3000
+        - containerPort: 5000
       imagePullSecrets:
            - name: regcred
