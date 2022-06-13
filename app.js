@@ -12,97 +12,13 @@ import appRouter from './router/app.js';
 import projectRouter from './router/project.js';
 import metricsRouter from './router/metrics.js';
 
-import jwt from 'jsonwebtoken'
 
-import * as verifer from './auth/verifier.js'
+import * as auth from './conf/authz.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 
-
-
-
-
-
-
-function auth(format) {
-
-
-    return async function (ctx, next) {
-        var token;
-        try {
-            token = ctx.get('Authorization').substring(7)
-        } catch (e) {
-
-            ctx.status = 401
-            ctx.body = 'Invalid token'
-        }
-
-        if (token == null) {
-            ctx.status = 401
-            ctx.body = 'Invalid token'
-
-        }
-
-        var verified;
-        try {
-
-
-
-            jwt.verify(token, 'wzkuU2qQrbYHVNnBI2s759j57LRzJAr5')
-            verified = true
-        }
-        catch (e) {
-
-
-
-
-        }
-
-        if (verified != true) {
-
-            try {
-
-
-
-                await verifer.validate(token, 'net-inc')
-            }
-            catch (e) {
-
-
-
-
-                ctx.status = 401
-                ctx.body = 'Invalid token'
-
-
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        await next();
-    };
-}
 
 
 
@@ -119,11 +35,10 @@ const app = new Koa()
 
 
 app.use(cors(
-    //     {
-    //     origin: '*',
-    //     credentials: true,
-    // }
 ));
+
+
+
 
 
 
@@ -133,6 +48,7 @@ app.use(bodyParser())
 
 
 
+app.use(auth.authz());
 
 
 app.use(projectRouter.routes(), projectRouter.allowedMethods())

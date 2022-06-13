@@ -1,4 +1,3 @@
-export KUBECONFIG=~/Conf/ctrl.yaml
 pack build registry.gitlab.com/utkarshkanwat/cloud-server:latest  --buildpack gcr.io/paketo-buildpacks/nodejs \
   --builder paketobuildpacks/builder:base
 docker push registry.gitlab.com/utkarshkanwat/cloud-server:latest
