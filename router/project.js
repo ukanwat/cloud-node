@@ -1,7 +1,7 @@
 import Router from '@koa/router'
 import { v1 } from '@authzed/authzed-node';
 
-import { client as graphqlClient } from '../client/graphql.js';
+import { graphqlClient as graphqlClient } from '../client/graphql.js';
 import { ClientSecurity } from '@authzed/authzed-node/dist/src/util.js';
 import * as env from '../conf/env.js'
 import jwt from 'jsonwebtoken';
@@ -71,18 +71,19 @@ projectRouter.post('/create', async function (ctx, next) {
 
 
     });
-
-    client.writeRelationships(relationshipRequest, (err, response) => {
-        console.log(response);
-        console.log(err);
-        if (err == null) {
-            ctx.status = 200
-            ctx.body = JSON.stringify(response)
-        } {
-            ctx.status = 409
-            ctx.body = JSON.stringify(err)
-        }
-    });
+    var data = await new Promise((resolve, reject) => {
+        client.writeRelationships(relationshipRequest, (err, response) => {
+            console.log(response);
+            console.log(err);
+            if (err == null) {
+                resolve(response)
+            } {
+                ctx.throw('401', 'Invalid Request')
+            }
+        });
+    })
+    ctx.body = data
+    ctx.status = 200
 
 })
 
@@ -101,18 +102,185 @@ projectRouter.get('/check', async function (ctx, next) {
 
 projectRouter.get('/list', async function (ctx, next) {
     const body = ctx.request.body
-    client.readRelationships(v1.ReadRelationshipsRequest.create({
+    var decoded = jwt.decode(ctx.get('Authorization').substring(7))
+    const stream = client.readRelationships(v1.ReadRelationshipsRequest.create({
+
         relationshipFilter: v1.RelationshipFilter.create({
             resourceType: system + 'project',
-            optionalRelation: 'owner',
+            // optionalRelation: 'owner',
+
             optionalSubjectFilter: v1.SubjectFilter.create({
-                optionalSubjectId: body.userId
+                optionalSubjectId: decoded.entity_id,
+                subjectType: system + 'user',
+
             })
         })
     }))
-    ctx.body = permission
+
+
+
+    var data = await new Promise((resolve, reject) => {
+
+        const dataArray = []
+        console.log(dataArray)
+        stream.on('data', function (data) {
+
+            console.log(data)
+            console.log(dataArray)
+            dataArray.push(data)
+
+
+
+
+
+        })
+
+
+
+        stream.on('end', function (data) {
+
+
+
+            resolve(dataArray)
+
+
+        })
+    }
+
+    )
+
+    data = data.map(x => `{ project_id:  { _eq: "${x.relationship.resource.objectId}" }}`)
+
+
+
+    var q = ''
+    data.forEach((d) => {
+
+        q = q + d + ','
+    })
+
+    const projects = await graphqlClient.request(`
+    query {
+        projects(where:{_or:[${q}]}){
+          project_id
+         project_name
+        }
+      }
+      
+`)
+
+
+    ctx.body = JSON.stringify(projects.projects)
+    ctx.status = 200
+
+})
+
+
+
+
+
+
+
+
+projectRouter.get('/members', async function (ctx, next) {
+    const body = ctx.request.body
+    var decoded = jwt.decode(ctx.get('Authorization').substring(7))
+
+    console.log('de')
+    var data = await new Promise((resolve, reject) =>
+
+
+        client.expandPermissionTree(v1.ExpandPermissionTreeRequest.create({
+            permission: 'owner',
+            resource: v1.ObjectReference.create({ objectId: body.projectId, objectType: system + 'project' })
+        }),
+
+            (err, response) => {
+                console.log(response);
+                console.log(err);
+                if (err == null) {
+                    resolve(response)
+                } {
+                    ctx.status = 409
+                    reject(err)
+                }
+
+
+
+            })
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    data = data.treeRoot.treeType.leaf.subjects;
+
+    data = data.map(x => `{ user_id:  { _eq: "${x.object.objectId}" }}`)
+
+
+
+    var q = ''
+    data.forEach((d) => {
+
+        q = q + d + ','
+    })
+
+    const users = await graphqlClient.request(`
+    query {
+        users(where:{_or:[${q}]}){
+            username
+            user_id
+            photo_url
+            name
+            joined_at
+            email
+        }
+      }
+      
+`)
+
+    ctx.body = JSON.stringify(users.users)
     ctx.status = 200
 })
 
+
+
+
+
+// Permission tree
+// const data = await new Promise((resolve, reject) =>
+
+
+// client.expandPermissionTree(v1.ExpandPermissionTreeRequest.create({
+//     permission: 'owner',
+//     resource: v1.ObjectReference.create({ objectId: decoded.entity_id, objectType: system + 'user' })
+// }),
+
+//     (err, response) => {
+//         console.log(response);
+//         console.log(err);
+//         if (err == null) {
+//             resolve(response)
+//         } {
+//             ctx.status = 409
+//             reject(err)
+//         }
+
+
+
+//     })
+// )
 
 export default projectRouter
