@@ -18,14 +18,14 @@ var addressSchema = {
     "properties": {
         "metadata": {
             "name": { "type": "string" },
-            "namespace": "default",
+            // "namespace": "default",
         },
         "spec": {
             "template": {
                 "metadata": {
                     "annotations": {
-                        // "autoscaling.knative.dev/max-scale": max_scale.toString(),
-                        // "autoscaling.knative.dev/min-scale": min_scale.toString()
+                        "autoscaling.knative.dev/max-scale": { "type": "integer", "minimum": 1 },
+                        "autoscaling.knative.dev/min-scale": { "type": "integer", "minimum": 0 }
                     }
                 },
                 "spec": {
@@ -60,29 +60,21 @@ var addressSchema = {
 };
 
 // Person
-var schema = {
-    "id": "/app",
-    "type": "object",
-    "properties": {
-        "name": { "type": "string" },
-        "address": { "$ref": "/app" },
-        "votes": { "type": "integer", "minimum": 1 }
-    }
-};
 
-var p = {
-    "name": "Barack Obama",
-    "address": {
-        "lines": ["1600 Pennsylvania Avenue Northwest"],
-        "zip": "DC 20500",
-        "city": "Washington",
-        "country": "USA"
-    },
-    "votes": "lots"
-};
+
+// var p = {
+//     "name": "Barack Obama",
+//     "address": {
+//         "lines": ["1600 Pennsylvania Avenue Northwest"],
+//         "zip": "DC 20500",
+//         "city": "Washington",
+//         "country": "USA"
+//     },
+//     "votes": "lots"
+// };
 
 v.addSchema(addressSchema, '/SimpleAddress');
-console.log(v.validate(p, schema));
+// console.log(v.validate(p, schema));
 
 
 
@@ -109,6 +101,16 @@ appRouter.post('/create', async (ctx, next) => {
 
 
     const req = ctx.request
+
+
+
+    console.log(JSON.stringify(req.body))
+
+    const val = v.validate(req.body, schema)
+
+    ctx.throw('401', val)
+
+
     const defMaxScale = 10;
     const defMinScale = 0;
     const defEnv = [];

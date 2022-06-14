@@ -164,6 +164,7 @@ projectRouter.get('/list', async function (ctx, next) {
         projects(where:{_or:[${q}]}){
           project_id
          project_name
+         created_at
         }
       }
       
@@ -192,7 +193,7 @@ projectRouter.get('/members', async function (ctx, next) {
 
         client.expandPermissionTree(v1.ExpandPermissionTreeRequest.create({
             permission: 'owner',
-            resource: v1.ObjectReference.create({ objectId: body.projectId, objectType: system + 'project' })
+            resource: v1.ObjectReference.create({ objectId: ctx.request.query.projectId, objectType: system + 'project' })
         }),
 
             (err, response) => {

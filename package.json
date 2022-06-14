@@ -44,7 +44,9 @@
     "npm": "^8.12.1",
     "prom-client": "^14.0.1",
     "stripe": "^8.209.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "winston": "^3.7.2",
+    "winston-loki": "^6.0.5"
   },
   "devDependencies": {
     "@types/node": "^13.7.4",
