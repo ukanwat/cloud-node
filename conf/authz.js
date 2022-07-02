@@ -19,7 +19,6 @@ import LokiTransport from "winston-loki";
 
 const options = {
 
-
     transports: [
         new LokiTransport({
             host: "https://loki.corp.coplane.co",
@@ -28,7 +27,6 @@ const options = {
 
         })
     ]
-
 };
 
 

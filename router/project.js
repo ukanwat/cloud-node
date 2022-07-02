@@ -187,7 +187,7 @@ projectRouter.get('/members', async function (ctx, next) {
     const body = ctx.request.body
     var decoded = jwt.decode(ctx.get('Authorization').substring(7))
 
-    console.log('de')
+
     var data = await new Promise((resolve, reject) =>
 
 

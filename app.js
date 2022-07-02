@@ -8,7 +8,6 @@ import { dirname } from 'path';
 
 import bodyParser from 'koa-bodyparser';
 import router from './router/index.js';
-import userRouter from './router/deployment.js';
 import appRouter from './router/app.js';
 import projectRouter from './router/project.js';
 import metricsRouter from './router/metrics.js';
@@ -60,7 +59,7 @@ app.use(projectRouter.routes(), projectRouter.allowedMethods())
 app.use(appRouter.routes(), appRouter.allowedMethods())
 app.use(router.routes(), router.allowedMethods())
 
-app.use(userRouter.routes(), userRouter.allowedMethods())
+// app.use(userRouter.routes(), userRouter.allowedMethods())
 
 
 
