@@ -11,6 +11,7 @@ import router from './router/index.js';
 import appRouter from './router/app.js';
 import projectRouter from './router/project.js';
 import metricsRouter from './router/metrics.js';
+import logsRouter from './router/logs.js';
 
 
 import * as auth from './conf/authz.js'
@@ -64,6 +65,7 @@ app.use(router.routes(), router.allowedMethods())
 
 
 app.use(metricsRouter.routes(), metricsRouter.allowedMethods())
+app.use(logsRouter.routes(), logsRouter.allowedMethods())
 
 
 

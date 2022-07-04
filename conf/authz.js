@@ -5,45 +5,50 @@ import * as verifer from './verifier.js'
 
 
 
+import { checkProjectPermission } from '../functions/spicedb.js';
 
 
 
 
-
-import { createLogger, transports } from "winston";
+import { createLogger, format, transports } from "winston";
 import LokiTransport from "winston-loki";
 
 
 
 
 
-const options = {
-
-    transports: [
-        new LokiTransport({
-            host: "https://loki.corp.coplane.co",
-            json: true,
-            basicAuth: '698295:GJhf39H12KjdwbHhFj179gPnwd139nH3K1h5GJhv13hs92gubfdKbwfh3ydbnK3G3dji9Fdn',
-
-        })
-    ]
-};
+function logging({ entityId, entityType, url, request, projectId }) {
 
 
 
+    // const { combine, timestamp, label, printf, prettyPrint } = format;
+
+
+    const options = {
+        // format: combine(
+        //     label({ label: 'right meow!' }),
+        //     timestamp(),
+        //     prettyPrint()
+        //   ),
+
+        transports: [
+            new LokiTransport({
+                host: "https://loki.corp.coplane.co",
+                json: true,
+                basicAuth: '698295:GJhf39H12KjdwbHhFj179gPnwd139nH3K1h5GJhv13hs92gubfdKbwfh3ydbnK3G3dji9Fdn',
+                labels: { job: 'node-server', entity_id: entityId, entity_type: entityType, project_id: projectId }
+
+            })
+        ]
+    };
 
 
 
 
 
+    const log = createLogger(options);
 
-const log = createLogger(options);
-
-
-
-
-function logging({ entityId, entityType, url }) {
-    log.log('info', { url: url, entityId: entityId, entityType: entityType, });
+    log.log('info', { url: url, entity_id: entityId, entity_type: entityType, request: request });
 }
 
 
@@ -128,8 +133,53 @@ function authz() {
 
 
         const url = ctx.request.url
+        const request = ctx.request
 
-        logging({ entityId, entityType, url });
+
+
+
+
+
+
+
+        const projectId = request.body.projectId ?? request.query.projectId ?? 'null'
+
+
+
+
+
+        //check permission
+        if (projectId != 'null' && false) {
+            const permission = await checkProjectPermission(ctx, projectId)
+        }
+
+        logging({ entityId, entityType, url, request, projectId });
+
+
+        await next();
+    };
+}
+
+
+
+
+
+
+
+function logs() {
+
+
+    return async function (ctx, next) {
+
+        const url = ctx.request.url
+        const request = ctx.request
+
+
+
+        const projectId = request.body.projectId ?? request.query.projectId ?? 'null'
+
+
+        logging({ entityId, entityType, url, request, projectId });
 
 
         await next();
